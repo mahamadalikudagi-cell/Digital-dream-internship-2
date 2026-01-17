@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Port Poyo Hotel — Management Portal</title>
+  <style>
+    :root {
+      --bg: #0f172a;
+      --card: #111827;
+      --accent: #22c55e;
+      --text: #e5e7eb;
+      --muted: #9ca3af;
+      --border: #1f2937;
+      --danger: #ef4444;
+      --focus: #93c5fd;
+    }
+
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; background: var(--bg); color: var(--text); font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, 'Helvetica Neue', Arial, 'Noto Sans', 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol'; }
+
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    .container { max-width: 1100px; margin: 0 auto; padding: 24px; }
+
+    /* Header */
+    header {
+      position: sticky; top: 0; z-index: 10;
+      background: linear-gradient(180deg, rgba(15,23,42,0.95), rgba(15,23,42,0.85));
+      backdrop-filter: blur(6px);
+      border-bottom: 1px solid var(--border);
+    }
+    .nav {
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 16px; padding: 12px 24px;
+    }
+    .brand { display: flex; align-items: center; gap: 12px; font-weight: 700; letter-spacing: 0.3px; }
+    .brand .logo {
+      width: 36px; height: 36px; border-radius: 8px;
+      background: radial-gradient(120% 120% at 20% 20%, #34d399 0%, #22c55e 40%, #0ea5e9 100%);
+      box-shadow: 0 0 0 2px #0ea5e9 inset, 0 8px 24px rgba(34,197,94,0.35);
+    }
+    .nav-links { display: flex; gap: 18px; }
+    .nav-links a { color: var(--text); opacity: 0.9; }
+    .nav-links a:hover { opacity: 1; }
+
+    /* Hero */
+    .hero {
+      padding: 48px 24px 24px;
+      background: linear-gradient(135deg, rgba(34,197,94,0.08), rgba(14,165,233,0.06));
+      border-bottom: 1px solid var(--border);
+    }
+    .hero-inner { display: grid; grid-template-columns: 1.2fr 0.8fr; gap: 24px; align-items: center; }
+    .hero h1 { margin: 0 0 12px; font-size: 2rem; }
+    .hero p { margin: 0 0 16px; color: var(--muted); }
+    .hero .badge {
+      display: inline-block; padding: 6px 10px; border: 1px solid var(--border);
+      border-radius: 999px; font-size: 0.85rem; color: var(--muted);
+      background: rgba(17,24,39,0.6);
+    }
+    .hero-card {
+      background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 16px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.25);
+    }
+    .hero-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+    .stat {
+      background: #0b1220; border: 1px solid var(--border); border-radius: 10px; padding: 12px;
+    }
+    .stat .label { color: var(--muted); font-size: 0.8rem; }
+    .stat .value { font-size: 1.2rem; font-weight: 700; margin-top: 6px; }
+
+    /* Sections */
+    section { padding: 32px 24px; }
+    .section-title { font-size: 1.4rem; margin: 0 0 12px; }
+    .section-sub { color: var(--muted); margin: 0 0 20px; }
+
+    /* Room cards */
+    .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
+    .card {
+      background: var(--card); border: 1px solid var(--border); border-radius: 12px; overflow: hidden;
+      display: flex; flex-direction: column;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    .card:hover { transform: translateY(-2px); box-shadow: 0 12px 28px rgba(0,0,0,0.25); }
+    .card-img {
+      height: 140px; background-size: cover; background-position: center;
+      border-bottom: 1px solid var(--border);
+    }
+    .card-body { padding: 14px; display: grid; gap: 8px; }
+    .pill {
+      display: inline-block; padding: 4px 10px; border-radius: 999px; font-size: 0.8rem;
+      border: 1px solid var(--border); color: var(--muted);
+    }
+    .price { font-weight: 700; color: var(--accent); }
+    .meta { color: var(--muted); font-size: 0.9rem; }
+
+    /* Booking form */
+    .form {
+      background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 16px;
+      display: grid; gap: 12px;
+    }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    label { font-size: 0.9rem; color: var(--muted); margin-bottom: 6px; display: block; }
+    input, select, textarea {
+      width: 100%; padding: 10px 12px; border-radius: 10px; border: 1px solid var(--border);
+      background: #0b1220; color: var(--text);
+      outline: none;
+    }
+    input:focus, select:focus, textarea:focus { border-color: var(--focus); box-shadow: 0 0 0 3px rgba(147,197,253,0.2); }
+    .btn {
+      display: inline-block; padding: 10px 14px; border-radius: 10px; border: 1px solid #16a34a;
+      background: linear-gradient(180deg, #22c55e, #16a34a); color: #062b17; font-weight: 700; cursor: pointer;
+    }
+    .btn.secondary {
+      border-color: var(--border); background: #0b1220; color: var(--text);
+    }
+
+    /* Contact */
+    .contact {
+      background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 16px;
+      display: grid; gap: 8px;
+    }
+    .contact .row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .contact-item { background: #0b1220; border: 1px solid var(--border); border-radius: 10px; padding: 12px; }
+    .contact-item .label { color: var(--muted); font-size: 0.85rem; }
+    .contact-item .value { font-weight: 700; }
+
+    /* Footer */
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 18px 24px; color: var(--muted); text-align: center;
+    }
+
+    /* Responsive */
+    @media (max-width: 980px) {
+      .hero-inner { grid-template-columns: 1fr; }
+      .grid { grid-template-columns: repeat(2, 1fr); }
+      .form-row, .contact .row { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 640px) {
+      .grid { grid-template-columns: 1fr; }
+      .nav-links { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Header -->
+  <header>
+    <div class="nav">
+      <div class="brand">
+        <div class="logo" aria-hidden="true"></div>
+        <div>Port Poyo Hotel</div>
+      </div>
+      <nav class="nav-links" aria-label="Primary">
+        <a href="#rooms">Rooms</a>
+        <a href="#booking">Booking</a>
+        <a href="#contact">Contact</a>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Hero -->
+  <section class="hero">
+    <div class="container hero-inner">
+      <div>
+        <span class="badge">Hotel management portal — HTML & CSS only</span>
+        <h1>Manage rooms, accept bookings, and share contact info</h1>
+        <p>Simple, responsive layout with room listings, a booking form, and contact details. No JavaScript or backend—perfect for static hosting or a design prototype.</p>
+      </div>
+      <div class="hero-card">
+        <div class="hero-grid">
+          <div class="stat">
+            <div class="label">Available rooms</div>
+            <div class="value">18</div>
+          </div>
+          <div class="stat">
+            <div class="label">Avg. nightly rate</div>
+            <div class="value">₹3,200</div>
+          </div>
+          <div class="stat">
+            <div class="label">Guest rating</div>
+            <div class="value">4.6/5</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Rooms -->
+  <section id="rooms">
+    <div class="container">
+      <h2 class="section-title">Room listings</h2>
+      <p class="section-sub">Browse available room types with amenities and pricing.</p>
+
+      <div class="grid">
+        <!-- Room 1 -->
+        <article class="card" aria-label="Deluxe King Room">
+          <div class="card-img" style="background-image: url('https://images.unsplash.com/photo-1560067174-894b1a6a1b6b?q=80&w=1200&auto=format&fit=crop');"></div>
+          <div class="card-body">
+            <div class="pill">Deluxe King</div>
+            <div class="meta">City view • 28 m² • Free Wi‑Fi</div>
+            <div class="price">₹4,500 / night</div>
+            <div class="meta">Sleeps 2 • Breakfast included</div>
+          </div>
+        </article>
+
+        <!-- Room 2 -->
+        <article class="card" aria-label="Twin Room">
+          <div class="card-img" style="background-image: url('https://images.unsplash.com/photo-1505691938895-1758d7feb511?q=80&w=1200&auto=format&fit=crop');"></div>
+          <div class="card-body">
+            <div class="pill">Superior Twin</div>
+            <div class="meta">Garden view • 24 m² • Free Wi‑Fi</div>
+            <div class="price">₹3,200 / night</div>
+            <div class="meta">Sleeps 2 • Flexible cancellation</div>
+          </div>
+        </article>
+
+        <!-- Room 3 -->
+        <article class="card" aria-label="Suite">
+          <div class="card-img" style="background-image: url('https://images.unsplash.com/photo-1554995207-87ab2a3b28c7?q=80&w=1200&auto=format&fit=crop');"></div>
+          <div class="card-body">
+            <div class="pill">Executive Suite</div>
+            <div class="meta">Panoramic view • 45 m² • Workspace</div>
+            <div class="price">₹8,900 / night</div>
+            <div class="meta">Sleeps 3 • Lounge access</div>
+          </div>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- Booking -->
+  <section id="booking">
+    <div class="container">
+      <h2 class="section-title">Booking form</h2>
+      <p class="section-sub">Submit your reservation request. This demo uses only HTML—connect to a backend to process submissions.</p>
+
+      <form class="form" action="#" method="post">
+        <div class="form-row">
+          <div>
+            <label for="name">Full name</label>
+            <input id="name" name="name" type="text" placeholder="e.g., Priya Sharma" required />
+          </div>
+          <div>
+            <label for="email">Email</label>
+            <input id="email" name="email" type="email" placeholder="e.g., priya@example.com" required />
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div>
+            <label for="phone">Phone</label>
+            <input id="phone" name="phone" type="tel" placeholder="e.g., +91 98765 43210" />
+          </div>
+          <div>
+            <label for="room-type">Room type</label>
+            <select id="room-type" name="room_type" required>
+              <option value="">Select a room</option>
+              <option>Deluxe King</option>
+              <option>Superior Twin</option>
+              <option>Executive Suite</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div>
+            <label for="checkin">Check‑in</label>
+            <input id="checkin" name="checkin" type="date" required />
+          </div>
+          <div>
+            <label for="checkout">Check‑out</label>
+            <input id="checkout" name="checkout" type="date" required />
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div>
+            <label for="guests">Guests</label>
+            <select id="guests" name="guests" required>
+              <option value="">Select</option>
+              <option>1</option>
+              <option>2</option>
+              <option>3</option>
+              <option>4</option>
+            </select>
+          </div>
+          <div>
+            <label for="requests">Special requests</label>
+            <input id="requests" name="requests" type="text" placeholder="e.g., Late check‑in, high floor" />
+          </div>
+        </div>
+
+        <div>
+          <label for="notes">Notes</label>
+          <textarea id="notes" name="notes" rows="3" placeholder="Anything else we should know?"></textarea>
+        </div>
+
+        <div style="display:flex; gap:10px; align-items:center;">
+          <button class="btn" type="submit" aria-label="Submit booking request">Submit request</button>
+          <button class="btn secondary" type="reset">Clear</button>
+          <span class="meta" aria-live="polite">Demo only—no data is sent.</span>
+        </div>
+      </form>
+    </div>
+  </section>
+
+  <!-- Contact -->
+  <section id="contact">
+    <div class="container">
+      <h2 class="section-title">Contact & location</h2>
+      <p class="section-sub">Reach out for corporate bookings, events, or support.</p>
+
+      <div class="contact">
+        <div class="row">
+          <div class="contact-item">
+            <div class="label">Phone</div>
+            <div class="value">+91 040 1234 5678</div>
+          </div>
+          <div class="contact-item">
+            <div class="label">Email</div>
+            <div class="value">reservations@portpoyo.example</div>
+          </div>
+        </div>
+        <div class="row">
+          <div class="contact-item">
+            <div class="label">Address</div>
+            <div class="value">Port Poyo, Gajwel — Telangana, India</div>
+          </div>
+          <div class="contact-item">
+            <div class="label">Hours</div>
+            <div class="value">Mon–Sun, 24×7 front desk</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer>
+    © 2026 Port Poyo Hotel • Static demo (HTML + CSS only)
+  </footer>
+
+</body>
+</html>
