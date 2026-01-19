@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>HR Employee Management Dashboard</title>
+
+<style>
+*{
+    box-sizing:border-box;
+    font-family:"Segoe UI", Arial, sans-serif;
+}
+body{
+    background:linear-gradient(135deg,#1e3c72,#2a5298);
+    padding:30px;
+}
+.container{
+    max-width:1000px;
+    margin:auto;
+    background:#fff;
+    padding:25px;
+    border-radius:10px;
+    box-shadow:0 15px 30px rgba(0,0,0,0.3);
+}
+h2{
+    text-align:center;
+    color:#1e3c72;
+}
+#search{
+    width:100%;
+    padding:10px;
+    margin-bottom:15px;
+    border-radius:6px;
+    border:1px solid #ccc;
+}
+form{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
+    gap:10px;
+    margin-bottom:20px;
+}
+form input, form button{
+    padding:10px;
+    border-radius:6px;
+    border:1px solid #ccc;
+}
+form button{
+    background:#1e3c72;
+    color:white;
+    border:none;
+    cursor:pointer;
+}
+form button:hover{ background:#16305f; }
+
+table{
+    width:100%;
+    border-collapse:collapse;
+}
+thead{
+    background:#1e3c72;
+    color:white;
+}
+th,td{
+    padding:10px;
+    text-align:center;
+}
+tbody tr:nth-child(even){
+    background:#f4f6fb;
+}
+.edit-btn{
+    background:#28a745;
+    color:white;
+    border:none;
+    padding:5px 8px;
+    border-radius:4px;
+    cursor:pointer;
+}
+.delete-btn{
+    background:#dc3545;
+    color:white;
+    border:none;
+    padding:5px 8px;
+    border-radius:4px;
+    cursor:pointer;
+}
+.edit-btn:hover{ background:#218838; }
+.delete-btn:hover{ background:#c82333; }
+</style>
+</head>
+
+<body>
+
+<div class="container">
+<h2>HR Employee Management Dashboard</h2>
+
+<input type="text" id="search" placeholder="Search by Name or Department">
+
+<form id="employeeForm">
+    <input type="hidden" id="editIndex">
+
+    <input type="text" id="empId" placeholder="Employee ID"
+    oninput="this.value=this.value.replace(/[^0-9]/g,'')">
+
+    <input type="text" id="name" placeholder="Employee Name"
+    oninput="this.value=this.value.replace(/[^A-Z ]/gi,'').toUpperCase()">
+
+    <input type="text" id="department" placeholder="Department">
+
+    <input type="email" id="email" placeholder="Email">
+
+    <input type="text" id="salary" placeholder="Salary"
+    oninput="this.value=this.value.replace(/[^0-9]/g,'')">
+
+    <button type="submit">Save Employee</button>
+</form>
+
+<table>
+<thead>
+<tr>
+<th>S.No</th>
+<th>Emp ID</th>
+<th>Name</th>
+<th>Department</th>
+<th>Email</th>
+<th>Salary</th>
+<th>Actions</th>
+</tr>
+</thead>
+<tbody id="tableBody"></tbody>
+</table>
+</div>
+
+<script>
+let employees = JSON.parse(localStorage.getItem("employees")) || [];
+
+const form = document.getElementById("employeeForm");
+const tableBody = document.getElementById("tableBody");
+const search = document.getElementById("search");
+
+form.addEventListener("submit", function(e){
+    e.preventDefault();
+
+    const empId = empIdField().value.trim();
+    const name = nameField().value.trim();
+    const dept = deptField().value.trim();
+    const email = emailField().value.trim();
+    const salary = salaryField().value.trim();
+    const editIndex = document.getElementById("editIndex").value;
+
+    if(!empId || !name || !dept || !email || !salary){
+        alert("All fields are mandatory!");
+        return;
+    }
+
+    if(empId.length < 4){
+        alert("Employee ID must be at least 4 digits!");
+        return;
+    }
+
+    const employee = {
+        empId,
+        name,
+        dept,
+        email,
+        salary: formatSalary(salary)
+    };
+
+    if(editIndex === ""){
+        employees.push(employee);
+    } else {
+        employees[editIndex] = employee;
+        document.getElementById("editIndex").value = "";
+    }
+
+    localStorage.setItem("employees", JSON.stringify(employees));
+    form.reset();
+    displayEmployees(employees);
+});
+
+function formatSalary(amount){
+    return "₹" + Number(amount).toLocaleString("en-IN");
+}
+
+function displayEmployees(data){
+    tableBody.innerHTML = "";
+    data.forEach((emp,index)=>{
+        tableBody.innerHTML += `
+        <tr>
+            <td>${index+1}</td>
+            <td>${emp.empId}</td>
+            <td>${emp.name}</td>
+            <td>${emp.dept}</td>
+            <td>${emp.email}</td>
+            <td>${emp.salary}</td>
+            <td>
+                <button class="edit-btn" onclick="editEmployee(${index})">Edit</button>
+                <button class="delete-btn" onclick="deleteEmployee(${index})">Delete</button>
+            </td>
+        </tr>`;
+    });
+}
+
+function editEmployee(index){
+    const emp = employees[index];
+    empIdField().value = emp.empId;
+    nameField().value = emp.name;
+    deptField().value = emp.dept;
+    emailField().value = emp.email;
+    salaryField().value = emp.salary.replace(/[^0-9]/g,'');
+    document.getElementById("editIndex").value = index;
+}
+
+function deleteEmployee(index){
+    if(confirm("Are you sure you want to delete this employee?")){
+        employees.splice(index,1);
+        localStorage.setItem("employees", JSON.stringify(employees));
+        displayEmployees(employees);
+    }
+}
+
+search.addEventListener("input", function(){
+    const value = this.value.toLowerCase();
+    const filtered = employees.filter(emp =>
+        emp.name.toLowerCase().includes(value) ||
+        emp.dept.toLowerCase().includes(value)
+    );
+    displayEmployees(filtered);
+});
+
+function empIdField(){ return document.getElementById("empId"); }
+function nameField(){ return document.getElementById("name"); }
+function deptField(){ return document.getElementById("department"); }
+function emailField(){ return document.getElementById("email"); }
+function salaryField(){ return document.getElementById("salary"); }
+
+displayEmployees(employees);
+</script>
+
+</body>
+</html>
